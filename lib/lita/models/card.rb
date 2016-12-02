@@ -7,7 +7,7 @@ class Card
     @id = args[:id]
     @name = args[:name]
     @owner = args[:owner]
-    @created_at = Time.parse(args[:created_at])
+    @created_at = Time.parse(args[:created_at].to_s)
   end
 
   def ==(other_card)

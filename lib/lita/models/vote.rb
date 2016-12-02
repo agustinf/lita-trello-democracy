@@ -7,7 +7,7 @@ class Vote
     @user = args[:user]
     @card_id = args[:card_id]
     @score = args[:score]
-    @voted_at = Time.parse(args[:voted_at])
+    @voted_at = Time.parse(args[:voted_at].to_s)
   end
 
   def dump
