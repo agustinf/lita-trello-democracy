@@ -1,6 +1,6 @@
 require "spec_helper"
 
-RSpec.describe Lita::Commands::Trello::GetRandomCards do
+RSpec.describe Lita::Commands::Trello::GetCards do
   let(:config) do
     double(developer_public_key: 'XXX', member_token: 'YYY')
   end
@@ -9,11 +9,11 @@ RSpec.describe Lita::Commands::Trello::GetRandomCards do
 
   let(:cards) do
     [
-      double(id: "XXX1", name: "Card 1", desc: "Description 1", pos: 1),
-      double(id: "XXX2", name: "Card 2", desc: "Description 2", pos: 2),
-      double(id: "XXX3", name: "Card 3", desc: "Description 3", pos: 3),
-      double(id: "XXX4", name: "Card 4", desc: "Description 4", pos: 4),
-      double(id: "XXX5", name: "Card 5", desc: "Description 5", pos: 5)
+      double(id: "XXX1", name: "Card 1", desc: "Description 1", short_url: "https://trello.com/a"),
+      double(id: "XXX2", name: "Card 2", desc: "Description 2", short_url: "https://trello.com/b"),
+      double(id: "XXX3", name: "Card 3", desc: "Description 3", short_url: "https://trello.com/c"),
+      double(id: "XXX4", name: "Card 4", desc: "Description 4", short_url: "https://trello.com/d"),
+      double(id: "XXX5", name: "Card 5", desc: "Description 5", short_url: "https://trello.com/e")
     ]
   end
 
@@ -43,9 +43,7 @@ RSpec.describe Lita::Commands::Trello::GetRandomCards do
         mock_boards
       end
 
-      it "raises error" do
-        expect { exec_cmd }.to raise_error("Platanus board not found")
-      end
+      it { expect { exec_cmd }.to raise_error("Platanus board not found") }
     end
 
     context "without INBOX list" do
@@ -54,21 +52,14 @@ RSpec.describe Lita::Commands::Trello::GetRandomCards do
         mock_boards
       end
 
-      it "raises error" do
-        expect { exec_cmd }.to raise_error("INBOX list not found")
-      end
+      it { expect { exec_cmd }.to raise_error("INBOX list not found") }
     end
 
     context "with valid data" do
       before { mock_boards }
 
-      it "returns 3 random cards" do
-        expect(exec_cmd.count).to eq(3)
-      end
-
-      it "returns random cards" do
-        expect(cards).to include(*exec_cmd)
-      end
+      it { expect(exec_cmd.count).to eq(5) }
+      it { expect(cards).to include(*exec_cmd) }
     end
   end
 end
