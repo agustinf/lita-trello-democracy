@@ -1,7 +1,7 @@
 module Lita
   module Commands
     module Trello
-      class GetRandomCards < Base
+      class GetCards < Base
         def perform
           inbox_cards
         end
@@ -19,7 +19,7 @@ module Lita
         end
 
         def inbox_cards
-          inbox_list.cards.sample(3)
+          inbox_list.cards
         end
       end
     end
