@@ -1,13 +1,13 @@
 require 'json'
 require 'time'
 class Card
-  attr_accessor :id, :name, :owner, :created_at
+  attr_accessor :id, :name, :short_url, :desc
 
   def initialize(args)
     @id = args[:id]
     @name = args[:name]
-    @owner = args[:owner]
-    @created_at = Time.parse(args[:created_at].to_s)
+    @short_url = args[:short_url]
+    @desc = args[:desc]
   end
 
   def ==(other_card)
@@ -18,8 +18,8 @@ class Card
     {
       id: id,
       name: name,
-      owner: owner,
-      created_at: created_at
+      short_url: short_url,
+      desc: desc
     }.to_json
   end
 

@@ -19,7 +19,14 @@ module Lita
         end
 
         def inbox_cards
-          inbox_list.cards
+          inbox_list.cards.map do |card|
+            ::Card.new(
+              id: card.id,
+              name: card.name,
+              short_url: card.short_url,
+              desc: card.desc
+            )
+          end
         end
       end
     end

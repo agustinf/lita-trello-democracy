@@ -59,7 +59,15 @@ RSpec.describe Lita::Commands::Trello::GetCards do
       before { mock_boards }
 
       it { expect(exec_cmd.count).to eq(5) }
-      it { expect(cards).to include(*exec_cmd) }
+
+      it "has valida data" do
+        first_card = exec_cmd.first
+        card = cards.first
+        expect(first_card.id).to eq(card.id)
+        expect(first_card.name).to eq(card.name)
+        expect(first_card.desc).to eq(card.desc)
+        expect(first_card.short_url).to eq(card.short_url)
+      end
     end
   end
 end

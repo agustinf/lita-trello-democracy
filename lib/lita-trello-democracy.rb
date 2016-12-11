@@ -8,6 +8,7 @@ Lita.load_locales Dir[File.expand_path(
 )]
 
 require "lita/commands/trello/base"
+require "lita/models/card"
 require "lita/commands/trello/get_cards"
 require "lita/handlers/vote_handler"
 
