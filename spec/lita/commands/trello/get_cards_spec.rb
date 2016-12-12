@@ -1,11 +1,13 @@
 require "spec_helper"
 
 RSpec.describe Lita::Commands::Trello::GetCards do
-  let(:config) do
-    double(developer_public_key: 'XXX', member_token: 'YYY')
+  let(:options) do
+    {
+      config: double(developer_public_key: 'XXX', member_token: 'YYY')
+    }
   end
 
-  let(:exec_cmd) { described_class.for(config) }
+  let(:exec_cmd) { described_class.for(options) }
 
   let(:cards) do
     [

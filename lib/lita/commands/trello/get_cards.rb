@@ -2,6 +2,11 @@ module Lita
   module Commands
     module Trello
       class GetCards < Base
+        def initialize(options)
+          @trello_objects = !!options.delete(:trello_objects)
+          super
+        end
+
         def perform
           inbox_cards
         end
@@ -19,6 +24,8 @@ module Lita
         end
 
         def inbox_cards
+          cards = inbox_list.cards
+          return cards if @trello_objects
           inbox_list.cards.map do |card|
             ::Card.new(
               id: card.id,
