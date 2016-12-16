@@ -65,7 +65,8 @@ module Lita
         voting_service.reset_pending_votes(user)
         voting_service.store_pending_vote(user, cards.map(&:id))
         message = build_message(user, cards)
-        robot.send_message(Source.new(user: user), message)
+        slack_user = Lita::User.find_by_mention_name(user)
+        robot.send_message(Source.new(user: slack_user), message)
       end
 
       def build_message(user, cards)
