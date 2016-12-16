@@ -6,7 +6,7 @@ class VotingService < PowerTypes::Service.new(:redis)
 
   def reset_pending_votes(user)
     pending = user_pending_votes(user).map(&:to_json)
-    @redis.srem("pending-votes", pending)
+    @redis.srem("pending-votes", pending) unless pending.empty?
   end
 
   def store_pending_vote(user, card_ids)
