@@ -28,6 +28,12 @@ module Lita
         run(voters)
       end
 
+      route(/please\sshow\svoters/, command: true) do |response|
+        message = "OK, here is the voter list:\n"
+        message += get_voters.join(", ")
+        response.reply(message)
+      end
+
       route("hello democracy") do |response|
         response.reply("Hello from here dude")
       end
