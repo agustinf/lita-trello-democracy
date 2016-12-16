@@ -3,12 +3,29 @@ module Lita
   module Handlers
     class VoteHandler < Handler
       on :loaded, :load_on_start
+      config :trello_config, required: true do
+        config :developer_public_key, type: String
+        config :member_token, type: String
+      end
+
+
       def load_on_start(_payload)
         create_schedule
       end
 
-      def run
-        # TODO
+      def run(voters)
+        all_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
+        SyncCards.for(cards: all_cards, redis: redis)
+        voters.each do |user|
+          vote_cards = all_cards.sample(3)
+          ask_vote(user, vote_cards)
+        end
+      end
+      
+      route(/please\sask\svote\sfrom\s+(.+)/, command: true) do |response|
+        user = response.matches[0][0]
+        voters = (user == "everyone") ? get_voters : [user]
+        run(voters)
       end
 
       route("hello democracy") do |response|
@@ -16,13 +33,32 @@ module Lita
       end
 
       # Receive a vote
-      route(/[123], ?[123], ?[123]$/, command: false) do |response|
+      route(/[123], ?[123], ?[123]$/, command: true) do |response|
         user = response.user.mention_name
-        card_ids = voting_sevice.get_pending_vote_card_ids(user)
-        resp_msg = response.matches[0][0]
+        card_ids = voting_service.get_pending_vote_card_ids(user)
+        resp_msg = response.matches.first
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
         response.reply("Muchas gracias!  Registré tu votación :+1:#{response.message}")
+        run_sorting
+      end
+
+
+      route(/please\sconsider\svoter\s+(.+)/, command: true) do |response|
+        voter_name = response.matches[0][0]
+        add_to_voters(voter_name)
+        response.reply("Ok dude. #{voter_name} is on the voters list")
+      end
+
+      route(/please\sremove\svoter\s+(.+)/, command: true) do |response|
+        voter_name = response.matches[0][0]
+        remove_from_voters(voter_name)
+        response.reply("Ok dude. #{voter_name} has been removed from the voters list")
+      end
+
+      def run_sorting
+        sorted_cards = SortCards.for(cards: get_cards, votes: get_votes)
+        Lita::Commands::Trello::SortCards.for(cards: sorted_cards, config: config.trello_config)
       end
 
       def ask_vote(user, cards)
@@ -33,18 +69,41 @@ module Lita
       end
 
       def build_message(user, cards)
-        # TODO
-        "Hello I'm the message"
+        message = "Hola #{user}, me haces un favor? :peanutbutterjellytime:\n" +
+            " Ordena estas 3 tarjetas de acuerdo a la prioridad " +
+            "que piensas tienen para Platanus en este momento.\n"
+        cards.each_with_index { |card, index | message += "\n#{(index + 1)}. #{card.name} #{card.short_url}" }
+        message + "\nEj. #{[1,2,3].shuffle.join(", ")}"
+      end
+
+      def get_cards
+        redis.smembers("cards").map { |card_json| Card.from_dump(card_json) }
+      end
+
+      def get_votes
+        redis.smembers("votes").map { |votes_json| Vote.from_dump(votes_json) }
       end
 
       def voting_service
-        @voting_sevice ||= VotingService.new(redis: redis)
+        @voting_service ||= VotingService.new(redis: redis)
+      end
+
+      def get_voters
+        redis.smembers("voters") || []
+      end
+
+      def add_to_voters(mention_name)
+        redis.sadd("voters", mention_name)
+      end
+
+      def remove_from_voters(mention_name)
+        redis.srem("voters", mention_name)
       end
 
       def create_schedule
         scheduler = Rufus::Scheduler.new
         scheduler.cron(ENV['DEMOCRACY_CRON']) do
-          run
+          run(get_voters)
         end
       end
 
