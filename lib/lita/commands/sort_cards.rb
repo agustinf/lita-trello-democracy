@@ -7,7 +7,7 @@ class SortCards < PowerTypes::Command.new(:cards, :votes)
         score = 0
       else
         score = card_votes.map { |v| v.score * Math.exp((1/86400*30*10)*(v.voted_at - Time.now)) }
-                          .inject(:+) / card_votes.size
+                          .inject(:+) / Math.sqrt(card_votes.size)
       end
       scored_cards << {card: c, score:score}
     end
