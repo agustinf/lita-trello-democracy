@@ -39,7 +39,7 @@ module Lita
         resp_msg = response.matches.first
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
-        response.reply("Muchas gracias!  Registré tu votación :+1:#{response.message}")
+        response.reply("Muchas gracias!  Registré tu votación :+1:")
         run_sorting
       end
 
