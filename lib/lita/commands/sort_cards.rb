@@ -9,8 +9,10 @@ class SortCards < PowerTypes::Command.new(:cards, :votes)
         score = card_votes.map { |v| v.score * Math.exp((1/86400*30*10)*(v.voted_at - Time.now)) }
                           .inject(:+) / Math.sqrt(card_votes.size)
       end
-      scored_cards << {card: c, score:score}
+      c.score = score
+      c.votes = card_votes.count
+      scored_cards << c
     end
-    scored_cards.sort { |x,y| y[:score] <=> x[:score] }.map { |sorted_card| sorted_card[:card] }
+    scored_cards.sort_by(&:score).reverse
   end
 end
