@@ -14,13 +14,13 @@ module Lita
         private
 
         def platanus_board
-          ::Trello::Board.all.each { |board| return board if board.name == "Platanus" }
-          raise "Platanus board not found"
+          ::Trello::Board.all.each { |board| return board if board.name == ENV.fetch("TRELLO_BOARD_NAME") }
+          raise "#{ENV.fetch("TRELLO_BOARD_NAME")} board not found"
         end
 
         def inbox_list
-          platanus_board.lists.each { |list| return list if /INBOX/ =~ list.name }
-          raise "INBOX list not found"
+          platanus_board.lists.each { |list| return list if Regexp.new(ENV.fetch("TRELLO_LIST_NAME")) =~ list.name }
+          raise "#{ENV.fetch("TRELLO_LIST_NAME")} list not found"
         end
 
         def inbox_cards
