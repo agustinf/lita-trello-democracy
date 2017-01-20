@@ -21,7 +21,7 @@ module Lita
           ask_vote(user, vote_cards)
         end
       end
-      
+
       route(/please\sask\svote\sfrom\s+(.+)/, command: true) do |response|
         user = response.matches[0][0]
         voters = (user == "everyone") ? get_voters : [user]
@@ -48,7 +48,6 @@ module Lita
         response.reply("Muchas gracias!  Registré tu votación :+1:")
         run_sorting
       end
-
 
       route(/please\sconsider\svoter\s+(.+)/, command: true) do |response|
         voter_name = response.matches[0][0]
@@ -79,8 +78,13 @@ module Lita
         message = "Hola #{user}, me haces un favor? :peanutbutterjellytime:\n" +
             " Ordena estas 3 tarjetas de acuerdo a la prioridad " +
             "que piensas tienen para Platanus en este momento.\n"
-        cards.each_with_index { |card, index | message += "\n#{(index + 1)}. #{card.name} #{card.short_url}" }
+        cards.each_with_index { |card, index | message += "\n#{(index + 1)}. #{get_card_name(card.name)} #{card.short_url}" }
         message + "\nEj. #{[1,2,3].shuffle.join(", ")}"
+      end
+
+      def get_card_name(name)
+        score_regex =  Regexp.new '^\[(-?\d+)?p\/(\d+)?v\]\s'
+        clean_card_name = name.gsub(score_regex, "")
       end
 
       def get_cards
