@@ -30,11 +30,11 @@ module Lita
         end
 
         def get_score(id)
-          @cards.select {|card| card.id == id }.first&.score&.round
+          @cards.select {|card| card.id == id }.first.try(:score).try(:round)
         end
 
         def get_votes(id)
-          @cards.select {|card| card.id == id }.first&.votes
+          @cards.select {|card| card.id == id }.first.try(:votes)
         end
       end
     end
