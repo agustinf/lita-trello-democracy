@@ -98,7 +98,7 @@ module Lita
 
       def get_cards
         cards = redis.smembers("cards").map { |card_json| Card.from_dump(card_json) }
-        AttachVotesToCards(cards: cards, redis: redis)
+        AttachVotesToCards.for(cards: cards, redis: redis)
         cards
       end
 
