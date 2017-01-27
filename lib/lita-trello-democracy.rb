@@ -15,6 +15,7 @@ require "lita/commands/trello/sort_cards"
 require "lita/commands/sort_cards"
 require "lita/commands/sync_cards"
 require "lita/commands/parse_vote_response"
+require "lita/commands/attach_votes_to_cards"
 require "lita/handlers/vote_handler"
 require "lita/services/voting_service"
 

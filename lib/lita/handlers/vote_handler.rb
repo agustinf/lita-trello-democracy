@@ -15,6 +15,7 @@ module Lita
 
       def run(voters)
         all_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
+        AttachVotesToCards.for(cards: all_cards, redis: redis)
         SyncCards.for(cards: all_cards, redis: redis)
         voters.each do |user|
           vote_cards = all_cards.sample(3)
@@ -62,7 +63,7 @@ module Lita
       end
 
       def run_sorting
-        sorted_cards = SortCards.for(cards: get_cards, votes: get_votes)
+        sorted_cards = SortCards.for(cards: get_cards)
         Lita::Commands::Trello::SortCards.for(cards: sorted_cards, config: config.trello_config)
       end
 
@@ -88,11 +89,9 @@ module Lita
       end
 
       def get_cards
-        redis.smembers("cards").map { |card_json| Card.from_dump(card_json) }
-      end
-
-      def get_votes
-        redis.smembers("votes").map { |votes_json| Vote.from_dump(votes_json) }
+        cards = redis.smembers("cards").map { |card_json| Card.from_dump(card_json) }
+        AttachVotesToCards(cards: cards, redis: redis)
+        cards
       end
 
       def voting_service
