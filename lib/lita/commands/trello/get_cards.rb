@@ -29,11 +29,18 @@ module Lita
           inbox_list.cards.map do |card|
             ::Card.new(
               id: card.id,
-              name: card.name,
+              name: get_clean_name(card.name),
               short_url: card.short_url,
               desc: card.desc
             )
           end
+        end
+
+        private
+
+        def get_clean_name(name)
+          score_regex =  Regexp.new '^\[(-?\d+)?p\/(\d+)?v\]\s'
+          name.gsub(score_regex, "")
         end
       end
     end

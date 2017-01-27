@@ -14,6 +14,14 @@ class Card
     id == other_card.id
   end
 
+  def name_with_stats
+    "[#{score}p/#{votes.count}v] #{name}"
+  end
+
+  def score
+    votes.empty? ? 0 : votes.map(&:score).inject(:+)
+  end
+
   def dump
     {
       id: id,
