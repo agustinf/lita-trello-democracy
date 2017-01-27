@@ -47,6 +47,7 @@ module Lita
         resp_msg = response.matches.first
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
+        voting_service.reset_pending_votes(user)
         unsorted_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
         sorted_cards = run_sorting
         response.reply("Listo, muchas gracias! Registré tu votación :+1:")
