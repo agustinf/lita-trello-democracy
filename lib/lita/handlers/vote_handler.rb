@@ -41,9 +41,13 @@ module Lita
 
       # Receive a vote
       route(/[123], ?[123], ?[123]$/, command: true) do |response|
-        response.reply("Procesando tu votación... :clock1:")
         user = response.user.mention_name
         card_ids = voting_service.get_pending_vote_card_ids(user)
+        if card_ids.nil?
+          response.reply("Ya votaste, tramposo.")
+          next
+        end
+        response.reply("Procesando tu votación... :clock1:")
         resp_msg = response.matches.first
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
