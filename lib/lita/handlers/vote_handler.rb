@@ -41,13 +41,18 @@ module Lita
 
       # Receive a vote
       route(/[123], ?[123], ?[123]$/, command: true) do |response|
+        response.reply("Procesando tu votación... :clock1:")
         user = response.user.mention_name
         card_ids = voting_service.get_pending_vote_card_ids(user)
         resp_msg = response.matches.first
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
-        response.reply("Muchas gracias!  Registré tu votación :+1:")
-        run_sorting
+        unsorted_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
+        sorted_cards = run_sorting
+        response.reply("Listo, muchas gracias! Registré tu votación :+1:")
+        response.reply("De las #{unsorted_cards.length} tarjetas, las que votaste han quedado rankeadas de la siguiente manera:")
+        response.reply GenerateRankingMessage.for(sorted_cards: sorted_cards, unsorted_cards: unsorted_cards, card_ids: card_ids)
+        send_sorted_cards_to_trello sorted_cards
       end
 
       route(/please\sconsider\svoter\s+(.+)/, command: true) do |response|
@@ -63,7 +68,10 @@ module Lita
       end
 
       def run_sorting
-        sorted_cards = SortCards.for(cards: get_cards)
+        SortCards.for(cards: get_cards)
+      end
+
+      def send_sorted_cards_to_trello(sorted_cards)
         Lita::Commands::Trello::SortCards.for(cards: sorted_cards, config: config.trello_config)
       end
 

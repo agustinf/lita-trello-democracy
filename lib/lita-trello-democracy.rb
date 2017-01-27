@@ -17,6 +17,7 @@ require "lita/commands/sync_cards"
 require "lita/commands/parse_vote_response"
 require "lita/commands/attach_votes_to_cards"
 require "lita/commands/select_voting_cards"
+require "lita/commands/generate_ranking_message"
 require "lita/handlers/vote_handler"
 require "lita/services/voting_service"
 
