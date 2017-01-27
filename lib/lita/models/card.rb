@@ -1,7 +1,7 @@
 require 'json'
 require 'time'
 class Card
-  attr_accessor :id, :name, :short_url, :desc, :score, :votes
+  attr_accessor :id, :name, :short_url, :desc, :score, :votes, :pending_votes_count
 
   def initialize(args)
     @id = args[:id]

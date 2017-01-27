@@ -18,7 +18,7 @@ module Lita
         AttachVotesToCards.for(cards: all_cards, redis: redis)
         SyncCards.for(cards: all_cards, redis: redis)
         voters.each do |user|
-          vote_cards = all_cards.sample(3)
+          vote_cards = SelectVotingCards.for(user: user, cards: all_cards)
           ask_vote(user, vote_cards)
         end
       end
