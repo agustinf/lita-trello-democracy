@@ -11,7 +11,7 @@ class GenerateRankingMessage < PowerTypes::Command.new(:sorted_cards, :unsorted_
         else
           icon = ":heavy_minus_sign:"
         end
-        response.push("#{index + 1}º - #{icon} - #{card.name}")
+        response.push("#{index + 1}º #{icon} #{card.name_with_stats}")
       end
     end
     response

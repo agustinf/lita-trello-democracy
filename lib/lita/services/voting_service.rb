@@ -15,7 +15,8 @@ class VotingService < PowerTypes::Service.new(:redis)
   end
 
   def get_pending_vote_card_ids(user)
-    user_pending_votes(user).first["card_ids"]
+    vote = user_pending_votes(user).first
+    (vote || {})["card_ids"]
   end
 
   private

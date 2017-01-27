@@ -13,9 +13,7 @@ module Lita
           trello_cards = @get_cards_cmd
           trello_cards.each do |card|
             pos = pos_map[card.id] || trello_cards.count
-            score_regex =  Regexp.new '^\[(-?\d+)?p\/(\d+)?v\]\s'
-            clean_card_name = card.name.gsub(score_regex, "")
-            card.name = "[#{get_score(card.id)}p/#{get_votes_count(card.id)}v] #{clean_card_name}"
+            card.name = get_card(card.id).name_with_stats
             card.pos = pos
             card.save
           end
@@ -29,12 +27,8 @@ module Lita
           map
         end
 
-        def get_score(id)
-          @cards.select {|card| card.id == id }.first.try(:score).try(:round)
-        end
-
-        def get_votes_count(id)
-          @cards.select {|card| card.id == id }.first.try(:votes).try(:count)
+        def get_card(id)
+          @cards.find {|card| card.id == id }
         end
       end
     end

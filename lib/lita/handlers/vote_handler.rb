@@ -41,12 +41,17 @@ module Lita
 
       # Receive a vote
       route(/[123], ?[123], ?[123]$/, command: true) do |response|
-        response.reply("Procesando tu votación... :clock1:")
         user = response.user.mention_name
         card_ids = voting_service.get_pending_vote_card_ids(user)
+        if card_ids.nil?
+          response.reply("Ya votaste, tramposo.")
+          next
+        end
+        response.reply("Procesando tu votación... :clock1:")
         resp_msg = response.matches.first
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
+        voting_service.reset_pending_votes(user)
         unsorted_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
         sorted_cards = run_sorting
         response.reply("Listo, muchas gracias! Registré tu votación :+1:")
@@ -87,18 +92,13 @@ module Lita
         message = "Hola #{user}, me haces un favor? :peanutbutterjellytime:\n" +
             " Ordena estas 3 tarjetas de acuerdo a la prioridad " +
             "que piensas tienen para Platanus en este momento.\n"
-        cards.each_with_index { |card, index | message += "\n#{(index + 1)}. #{get_card_name(card.name)} #{card.short_url}" }
+        cards.each_with_index { |card, index | message += "\n#{(index + 1)}. #{card.name} #{card.short_url}" }
         message + "\nEj. #{[1,2,3].shuffle.join(", ")}"
-      end
-
-      def get_card_name(name)
-        score_regex =  Regexp.new '^\[(-?\d+)?p\/(\d+)?v\]\s'
-        clean_card_name = name.gsub(score_regex, "")
       end
 
       def get_cards
         cards = redis.smembers("cards").map { |card_json| Card.from_dump(card_json) }
-        AttachVotesToCards(cards: cards, redis: redis)
+        AttachVotesToCards.for(cards: cards, redis: redis)
         cards
       end
 
