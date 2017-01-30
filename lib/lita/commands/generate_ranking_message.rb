@@ -4,7 +4,9 @@ class GenerateRankingMessage < PowerTypes::Command.new(:sorted_cards, :unsorted_
     @sorted_cards.each_with_index do |card, index|
       if is_voted_card?(card)
         unsorted_index = @unsorted_cards.index { |u| u.id == card.id }
-        if (unsorted_index > index)
+        if unsorted_index.nil?
+          icon = ":question:"
+        elsif (unsorted_index > index)
           icon = ":arrow_up:"
         elsif (unsorted_index < index)
           icon = ":arrow_down:"
