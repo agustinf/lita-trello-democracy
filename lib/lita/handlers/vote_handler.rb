@@ -15,7 +15,7 @@ module Lita
 
       def run(voters)
         all_cards = get_cards
-        voters.each do |user|
+        voters.shuffle.each do |user|
           vote_cards = SelectVotingCards.for(user: user, cards: all_cards)
           ask_vote(user, vote_cards)
         end
