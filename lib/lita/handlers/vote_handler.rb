@@ -14,10 +14,8 @@ module Lita
       end
 
       def run(voters)
-        all_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
-        AttachVotesToCards.for(cards: all_cards, redis: redis)
-        SyncCards.for(cards: all_cards, redis: redis)
-        voters.each do |user|
+        all_cards = get_cards
+        voters.shuffle.each do |user|
           vote_cards = SelectVotingCards.for(user: user, cards: all_cards)
           ask_vote(user, vote_cards)
         end
@@ -52,8 +50,8 @@ module Lita
         votes = ParseVoteResponse.for(user: user, card_ids: card_ids, response: resp_msg)
         votes.each { |vote| voting_service.save_vote(vote) }
         voting_service.reset_pending_votes(user)
-        unsorted_cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
-        sorted_cards = run_sorting
+        unsorted_cards = get_cards
+        sorted_cards = SortCards.for(cards: unsorted_cards)
         response.reply("Listo, muchas gracias! Registré tu votación :+1:")
         response.reply("De las #{unsorted_cards.length} tarjetas, las que votaste han quedado rankeadas de la siguiente manera:")
         response.reply GenerateRankingMessage.for(sorted_cards: sorted_cards, unsorted_cards: unsorted_cards, card_ids: card_ids)
@@ -70,10 +68,6 @@ module Lita
         voter_name = response.matches[0][0]
         remove_from_voters(voter_name)
         response.reply("Ok dude. #{voter_name} has been removed from the voters list")
-      end
-
-      def run_sorting
-        SortCards.for(cards: get_cards)
       end
 
       def send_sorted_cards_to_trello(sorted_cards)
@@ -97,7 +91,7 @@ module Lita
       end
 
       def get_cards
-        cards = redis.smembers("cards").map { |card_json| Card.from_dump(card_json) }
+        cards = Lita::Commands::Trello::GetCards.for(config: config.trello_config)
         AttachVotesToCards.for(cards: cards, redis: redis)
         cards
       end
