@@ -1,4 +1,20 @@
 en:
   lita:
     handlers:
-      dependencies:
+      vote_handler:
+        help:
+          hello:
+            usage: hello democracy
+            description: Lita Democracy say hello
+          show_voters:
+            usage: please show voters
+            description: List all voters
+          votes_from:
+            usage: please ask vote from [username]
+            description: Asks votation to specific user
+          consider_voter:
+            usage: please consider voter [username]
+            description: Add new voter
+          remove_voter:
+            usage: please remove voter [username]
+            description: Remove specific voter

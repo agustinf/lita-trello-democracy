@@ -8,9 +8,12 @@ module Lita
         config :member_token, type: String
       end
 
-
       def load_on_start(_payload)
         create_schedule
+      end
+
+      def self.help_msg(route)
+        { "trello-democracy: #{t("help.#{route}.usage")}" => t("help.#{route}.description") }
       end
 
       def run(voters)
@@ -21,20 +24,21 @@ module Lita
         end
       end
 
-      route(/please\sask\svote\sfrom\s+(.+)/, command: true) do |response|
+      route("hello democracy", command: true, help: help_msg('hello')) do |response|
+        response.reply("Hello from here dude")
+      end
+
+      route(/please\sask\svote\sfrom\s+(.+)/, command: true,
+                                              help: help_msg('votes_from')) do |response|
         user = response.matches[0][0]
-        voters = (user == "everyone") ? get_voters : [user]
+        voters = user == "everyone" ? get_voters : [user]
         run(voters)
       end
 
-      route(/please\sshow\svoters/, command: true) do |response|
+      route(/please\sshow\svoters/, command: true, help: help_msg('show_voters')) do |response|
         message = "OK, here is the voter list:\n"
         message += get_voters.join(", ")
         response.reply(message)
-      end
-
-      route("hello democracy") do |response|
-        response.reply("Hello from here dude")
       end
 
       # Receive a vote
@@ -58,13 +62,15 @@ module Lita
         send_sorted_cards_to_trello sorted_cards
       end
 
-      route(/please\sconsider\svoter\s+(.+)/, command: true) do |response|
+      route(/please\sconsider\svoter\s+(.+)/, command: true,
+                                              help: help_msg('consider_voter')) do |response|
         voter_name = response.matches[0][0]
         add_to_voters(voter_name)
         response.reply("Ok dude. #{voter_name} is on the voters list")
       end
 
-      route(/please\sremove\svoter\s+(.+)/, command: true) do |response|
+      route(/please\sremove\svoter\s+(.+)/, command: true,
+                                            help: help_msg('remove_voter')) do |response|
         voter_name = response.matches[0][0]
         remove_from_voters(voter_name)
         response.reply("Ok dude. #{voter_name} has been removed from the voters list")
